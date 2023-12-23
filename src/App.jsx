@@ -12,7 +12,7 @@ function App() {
       // console.log("fetching");
       // console.log(isFetching);
       async function getUsers() {
-        let response = axios("http://localhost:5555/");
+        let response = axios(process.env.REACT_APP_API_URL);
         const data = await response;
         setUsers([...users, ...data.data]);
         response.then(() => setIsFetching(false));
