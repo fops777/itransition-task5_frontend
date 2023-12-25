@@ -4,18 +4,16 @@ import "./App.css";
 
 function App() {
   const [users, setUsers] = useState([]);
-  const [seed, setSeed] = useState(0);
+  const [seed, setSeed] = useState();
   const [valueSlider, setValueSlider] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
 
+  // Первая порция юзеров
   useEffect(() => {
     if (isFetching) {
       async function getUsers() {
         let response = axios(process.env.REACT_APP_API_URL);
         // let response = axios.get("http://localhost:5555/");
-        // let response = axios.post("http://localhost:5555/seed", {
-        //   seed: seed,
-        // });
         const data = await response;
         setUsers([...users, ...data.data]);
         response.then(() => setIsFetching(false));
@@ -32,26 +30,37 @@ function App() {
     };
   }, []);
 
+  // Додгрузка юзеров(бесконечный скролл)
   function scrollHandler(e) {
     let scrollHeight = e.target.documentElement.scrollHeight; // высота html страницы с учетом скролла
     let scrollTop = e.target.documentElement.scrollTop; // расстояние от начала страницы
     let innerHeight = window.innerHeight; // высота html страницы
 
     if (scrollHeight - (scrollTop + innerHeight) < 100) {
-      // setSeed((prev) => prev + 1);
       setIsFetching(true);
     }
   }
 
+  // Инпут ползунок
   const handleSliderChange = (event) => {
     const newValue = event.target.value;
     setValueSlider(newValue);
 
-    let arrWithErrors = users.map((user) => {
-      // Надо логику: иногда ретурнить user.name, иногда user.addres, иногда user.phone
-      return { ...user, name: addRandomError(user.name, newValue) };
+    let usersWithErrors = users.map((user) => {
+      const errorPlace = Math.floor(Math.random() * 3);
+      switch (errorPlace) {
+        case 0:
+          return { ...user, name: addRandomError(user.name, newValue) };
+          break;
+        case 1:
+          return { ...user, number: addRandomError(user.number, newValue) };
+          break;
+        case 2:
+          return { ...user, addres: addRandomError(user.addres, newValue) };
+          break;
+      }
     });
-    setUsers(arrWithErrors);
+    setUsers(usersWithErrors);
   };
 
   // Генерация случайной ошибки в строке
@@ -93,9 +102,8 @@ function App() {
     return string;
   }
 
+  // При изменении seed-a
   function onSeedChange(e) {
-    console.log("сработал onSeedChange()");
-    console.log(seed);
     try {
       let currVal = e.target.value;
       setSeed(currVal);
@@ -103,8 +111,7 @@ function App() {
       async function getUsers() {
         let response = axios.post(process.env.REACT_APP_API_URL + "seed", {
           // let response = axios.post("http://localhost:5555/seed", {
-          // seed: currVal,
-          seed: seed,
+          seed: currVal,
         });
         const data = await response;
         setUsers([...data.data]);
