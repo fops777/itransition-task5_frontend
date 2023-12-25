@@ -4,16 +4,18 @@ import "./App.css";
 
 function App() {
   const [users, setUsers] = useState([]);
+  const [seed, setSeed] = useState(0);
   const [valueSlider, setValueSlider] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
 
   useEffect(() => {
     if (isFetching) {
-      // console.log("fetching");
-      // console.log(isFetching);
       async function getUsers() {
         let response = axios(process.env.REACT_APP_API_URL);
-        // let response = axios("http://localhost:5555/");
+        // let response = axios.get("http://localhost:5555/");
+        // let response = axios.post("http://localhost:5555/seed", {
+        //   seed: seed,
+        // });
         const data = await response;
         setUsers([...users, ...data.data]);
         response.then(() => setIsFetching(false));
@@ -36,6 +38,7 @@ function App() {
     let innerHeight = window.innerHeight; // высота html страницы
 
     if (scrollHeight - (scrollTop + innerHeight) < 100) {
+      // setSeed((prev) => prev + 1);
       setIsFetching(true);
     }
   }
@@ -46,29 +49,24 @@ function App() {
 
     let arrWithErrors = users.map((user) => {
       // Надо логику: иногда ретурнить user.name, иногда user.addres, иногда user.phone
-      return { ...user, name: addRandomError(user.name) };
+      return { ...user, name: addRandomError(user.name, newValue) };
     });
-
     setUsers(arrWithErrors);
   };
-  console.log(valueSlider);
 
   // Генерация случайной ошибки в строке
-  function addRandomError(string) {
-    const errorType = Math.floor(Math.random() * 3);
-    let result = string;
-
-    for (let i = 0; i < 5; i++) {
-      // Выбираем случайный индекс, где будет находиться ошибка
+  function addRandomError(string, errrsQtty) {
+    for (let i = 0; i < errrsQtty; i++) {
       const index = Math.floor(Math.random() * string.length);
+      const errorType = Math.floor(Math.random() * 3);
 
       switch (errorType) {
         // Замена символа
         case 0:
           const replacementChar = String.fromCharCode(
             Math.floor(Math.random() * 32) + 1072
-          ); // Выбираем случайную букву русского алфавита
-          result =
+          );
+          string =
             string.substring(0, index) +
             replacementChar +
             string.substring(index + 1);
@@ -76,7 +74,7 @@ function App() {
 
         // Удаление символа
         case 1:
-          result = string.substring(0, index) + string.substring(index + 1);
+          string = string.substring(0, index) + string.substring(index + 1);
           break;
 
         // Добавление лишнего символа
@@ -84,15 +82,38 @@ function App() {
           const extraChar = String.fromCharCode(
             Math.floor(Math.random() * 32) + 1072
           );
-          result =
+          string =
             string.substring(0, index) + extraChar + string.substring(index);
           break;
+
         default:
           break;
       }
     }
+    return string;
+  }
 
-    return result;
+  function onSeedChange(e) {
+    console.log("сработал onSeedChange()");
+    console.log(seed);
+    try {
+      let currVal = e.target.value;
+      setSeed(currVal);
+
+      async function getUsers() {
+        let response = axios.post(`${process.env.REACT_APP_API_URL}seed`, {
+          // let response = axios.post("http://localhost:5555/seed", {
+          // seed: currVal,
+          seed: seed,
+        });
+        const data = await response;
+        setUsers([...data.data]);
+        response.then(() => setIsFetching(false));
+      }
+      getUsers();
+    } catch (error) {
+      console.log("Error:", error);
+    }
   }
 
   return (
@@ -156,7 +177,11 @@ function App() {
           </div>
           <div className="d-flex align-items-center">
             <div className="me-3 fs-5">Seed:</div>
-            <input type="text" />
+            <input
+              value={seed}
+              onChange={(e) => onSeedChange(e)}
+              type="number"
+            />
           </div>
         </div>
       </nav>
