@@ -101,7 +101,7 @@ function App() {
       setSeed(currVal);
 
       async function getUsers() {
-        let response = axios.post(`${process.env.REACT_APP_API_URL}seed`, {
+        let response = axios.post(`${process.env.REACT_APP_API_URL}/seed`, {
           // let response = axios.post("http://localhost:5555/seed", {
           // seed: currVal,
           seed: seed,
