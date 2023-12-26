@@ -7,6 +7,7 @@ function App() {
   const [seed, setSeed] = useState();
   const [valueSlider, setValueSlider] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
+  const [disabledState, setDisabledState] = useState(false);
 
   // Первая порция юзеров
   useEffect(() => {
@@ -105,6 +106,7 @@ function App() {
   // При изменении seed-a
   function onSeedChange(e) {
     try {
+      setDisabledState(true);
       let currVal = e.target.value;
       setSeed(currVal);
 
@@ -116,6 +118,7 @@ function App() {
         const data = await response;
         setUsers([...data.data]);
         response.then(() => setIsFetching(false));
+        setDisabledState(false);
       }
       getUsers();
     } catch (error) {
@@ -195,19 +198,23 @@ function App() {
 
       <br />
       <div className="container table-responsive">
-        <table className="table">
+        <table className={"table " + (disabledState ? "opacity_custom" : "")}>
           <tbody>
-            {users.map((user, index) => {
-              return (
-                <tr key={user.id}>
-                  <td>{index + 1}</td>
-                  <td>{user.id}</td>
-                  <td>{user.name}</td>
-                  <td>{user.addres}</td>
-                  <td>{user.number}</td>
-                </tr>
-              );
-            })}
+            {users == "" ? (
+              <p className="fetching_loading">loading...</p>
+            ) : (
+              users.map((user, index) => {
+                return (
+                  <tr key={user.id}>
+                    <td>{index + 1}</td>
+                    <td>{user.id}</td>
+                    <td>{user.name}</td>
+                    <td>{user.addres}</td>
+                    <td>{user.number}</td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>
