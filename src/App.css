@@ -12,3 +12,14 @@
   opacity: 0.5;
   user-select: none;
 }
+
+.btn-outline-dark {
+  height: 29px;
+  padding: 0;
+  padding-right: 10px;
+  padding-left: 10px;
+}
+.btn-outline-dark:hover {
+  /* background-color: transparent; */
+  /* color: black; */
+}
